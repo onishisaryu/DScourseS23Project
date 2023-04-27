@@ -31,7 +31,6 @@ unique(us_acts$has_heartrate)
 
 run <- us_acts %>% filter(sport_type == "Run") %>%
   filter(has_heartrate == "TRUE") %>%
-  #na.omit() %>%
   select(c("name","id","start_date",
            "distance","elapsed_time",
            "total_elevation_gain",
@@ -45,15 +44,33 @@ run <- us_acts %>% filter(sport_type == "Run") %>%
   mutate(max_heartrate = as.numeric(max_heartrate)) %>%
   mutate(suffer_score = as.numeric(suffer_score)) %>% 
   mutate(elapsed_time = elapsed_time / 60) %>% 
-  rename(time_minutes = elapsed_time)
-
-run_mod <- run %>% select(-c("name","id","start_date")) #%>%
-                   # mutate(time_avehr = elapsed_time * average_heartrate) %>%
+  rename(time_minutes = elapsed_time) %>% 
+  mutate(time_minutes = as.numeric(time_minutes)) %>% 
+  na.omit()
+run_mod    <- run %>% select(-c("name","id","start_date"))
+mod <- list()
+# mod[['intercept_only']] <- lm(suffer_score ~ 1, data=run_mod)
+initial   <- mod[['initial']] <- lm(suffer_score ~ ., data=run_mod)
+back1 <- mod[['back1']] <- step(initial, direction='backward')
+# log the suffer_score variable
+# inital_log   <- mod[['inital_log']] <- lm(log(suffer_score) ~ ., data=run_mod)
+# back2 <- mod[['back2']] <- step(inital_log, direction='backward')
+mod[['back2']] <- step(all, direction = "backward", k = log(nrow(run_mod)), trace = 0)
+# results of backward stepwise regression
+summary(initial)
+library(car)
+vif(initial)
+vif(back1)
+modelsummary(mod)
+run_mod_v2 <- run %>% select(-c("name","id","start_date")) %>%
+                   mutate(timehr_ave = time_minutes * average_heartrate) %>%
+                   mutate(timehr_max = time_minutes * max_heartrate) %>% 
+                   mutate(timehr_all = time_minutes * average_heartrate * max_heartrate )
                    # mutate(speed_avehr = average_speed * average_heartrate) %>%
                    # mutate(elevation_avehr = total_elevation_gain * average_heartrate)
-head(run)
-head(run_mod)
-
+initialV2   <- lm(suffer_score ~ ., data=run_mod_v2)
+back2       <- step(initialV2, direction='backward')
+summary(back2)
 #correlation table
 cor_matrix <- cor(run_mod) %>% 
               as.data.frame() %>% 
@@ -66,14 +83,10 @@ cor_matrix <- cor(run_mod) %>%
 
 
 # Create backward stepwise linear regression
-mod <- list()
-mod[['intercept_only']] <- lm(suffer_score ~ 1, data=run_mod)
-all   <- mod[['all']] <- lm(suffer_score ~ ., data=run_mod)
-back1 <- mod[['back1']] <- step(all, direction='backward', scope=formula(all), trace=0)
-back2 <- mod[['back2']] <- step(all, direction = "backward", k = log(nrow(run_mod)), trace = 0)
-# results of backward stepwise regression
-back1$anova
-modelsummary(mod)
+rm(mod)
+
+
+
 
 quartz()
 par(mfrow = c(2, 2))
@@ -179,3 +192,8 @@ ggplot(data=tiz_16x400,aes(zone,fill = zone))+
 #   geom_line() +
 #   scale_color_gradient(low = "green", high = "red")+
 #   labs(title = "Heart Rate vs Distance", x = "Distance (m)", y = "Heart Rate (bpm)")
+
+# perform backward stepwise multiple regression
+library(olsrr)
+ols_step_best_subset(initial)
+ols_step_all_possible(initial)

@@ -139,7 +139,7 @@ mod_df <-
 ![](pred_actual.png)
 ]
 .pull-right[
-![](resid_pred.png)
+![](resid_fit.png)
 ]
 ---
 # Concluding Remarks
