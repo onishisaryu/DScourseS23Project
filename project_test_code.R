@@ -1,112 +1,150 @@
 library(rStrava)
-# library(devtools)
-devtools::install_github('fawda123/rStrava',force=T)
+#library(devtools)
+#devtools::install_github('fawda123/rStrava',force=T)
 library(tidyverse)
 library(modelsummary)
 library(ggplot2)
+library(corrplot)
 
 # using API to generate token
 app_name = 'Econ Project' 
 app_client_id  = '103449' 
 app_secret = Sys.getenv("API_KEY")
-stoken = httr::config(token = strava_oauth(app_name,
-                                            app_client_id,
-                                            app_secret,
-                                            app_scope="activity:read_all"))
 stoken <- httr::config(token = strava_oauth(app_name, 
                                             app_client_id, 
                                             app_secret, 
                                             app_scope="activity:read_all",
                                             cache = TRUE))
+# stoken = httr::config(token = strava_oauth(app_name,
+#                                             app_client_id,
+#                                             app_secret,
+#                                             app_scope="activity:read_all"))
+
 
 # scrape activities
-activities = rStrava::get_activity_list(stoken)
-# filter activities with latitude and longitude
-us_acts = compile_activities(activities) %>% 
-  filter(start_latlng2 < -97.176918, start_latlng2 > -97.547822) %>% 
-  filter(start_latlng1 < 35.348324, start_latlng1 > 35.145318) %>% 
-  filter(distance > 5) %>%
-  filter(sport_type == "Run")
+activities <- get_activity_list(stoken)
+# filter activities
+us_acts <- compile_activities(activities) %>% 
+  filter(location_country == "United States")  
+class(run)
+unique(us_acts$has_heartrate)
 
-run <- us_acts %>% filter(has_heartrate == "TRUE") 
-run_data <- select(run,c("name","id","distance","elapsed_time",
-                            "elev_high","elev_low","total_elevation_gain",
-                            "average_heartrate","max_heartrate",
-                            "average_cadence","average_speed",
-                            "suffer_score")) %>%
+run <- us_acts %>% filter(sport_type == "Run") %>%
+  filter(has_heartrate == "TRUE") %>%
+  #na.omit() %>%
+  select(c("name","id","start_date",
+           "distance","elapsed_time",
+           "total_elevation_gain",
+           "average_heartrate",
+           "max_heartrate",
+           "average_cadence",
+            "average_speed",
+            "suffer_score")) %>%
   mutate(average_cadence = as.numeric(average_cadence)) %>%
   mutate(average_heartrate = as.numeric(average_heartrate))%>%
   mutate(max_heartrate = as.numeric(max_heartrate)) %>%
-  mutate(suffer_score = as.numeric(suffer_score)) %>%
-  na.omit()
-run_mod = run_data %>% select(-c("name","id"))
+  mutate(suffer_score = as.numeric(suffer_score)) %>% 
+  mutate(elapsed_time = elapsed_time / 60) %>% 
+  rename(time_minutes = elapsed_time)
+
+run_mod <- run %>% select(-c("name","id","start_date")) #%>%
+                   # mutate(time_avehr = elapsed_time * average_heartrate) %>%
+                   # mutate(speed_avehr = average_speed * average_heartrate) %>%
+                   # mutate(elevation_avehr = total_elevation_gain * average_heartrate)
+head(run)
+head(run_mod)
+
+#correlation table
+cor_matrix <- cor(run_mod) %>% 
+              as.data.frame() %>% 
+              print()
+# cor_tab    <- cor_matrix %>% 
+#               select(suffer_score) %>%
+#               arrange(desc(suffer_score)) %>% 
+#               print()
+#   # filter(row.names() != "suffer_score") %>%
 
 
+# Create backward stepwise linear regression
 mod <- list()
-# intercept-only model
 mod[['intercept_only']] <- lm(suffer_score ~ 1, data=run_mod)
-# model with all predictors
-mod[['all']] <- lm(suffer_score ~ ., data=run_mod)
-all <- mod[['all']]
-# backward stepwise regression
-mod[['backward']] <- step(all, direction='backward', scope=formula(all), trace=0)
-backward <- mod[['backward']]
+all   <- mod[['all']] <- lm(suffer_score ~ ., data=run_mod)
+back1 <- mod[['back1']] <- step(all, direction='backward', scope=formula(all), trace=0)
+back2 <- mod[['back2']] <- step(all, direction = "backward", k = log(nrow(run_mod)), trace = 0)
 # results of backward stepwise regression
-backward$anova
-#view final model
-backward$coefficients
-summary(all)
-summary(backward)
+back1$anova
+modelsummary(mod)
+
+quartz()
 par(mfrow = c(2, 2))
-plot(backward)
-
-single <- list()
-distance <- single[['distance only']]        <- lm(suffer_score ~ distance, data=run_mod)
-elev_high <- single[['elevation only']]       <- lm(suffer_score ~ elev_high, data=run_mod)
-ave_hr <- single[['average hr only']]      <- lm(suffer_score ~ average_heartrate, data=run_mod)
-ave_cad <- single[['average cadence only']] <- lm(suffer_score ~ average_cadence, data=run_mod)
-par(mfrow = c(2, 2))
-with(run_mod,plot(suffer_score,average_heartrate))
-with(run_mod,plot(suffer_score,average_cadence))
-with(run_mod,plot(suffer_score,distance))
+plot(back1)
 
 
-plot(predict(backward),                                # Draw plot using Base R
-     run_data$suffer_score,
+# Plot the residuals over the outcome variable
+residuals <- resid(back1)
+plot_data <- data.frame(x = run_mod$suffer_score, y = residuals)
+ggplot(plot_data, aes(x = x, y = y)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(x = "Suffer Score", y = "Residuals")
+
+dev.off()
+par(mfrow = c(1, 2))
+p1 <- ggplot(data=run_mod,aes(log(distance),suffer_score))+geom_point()
+p2 <- ggplot(data=run_mod,aes((distance - mean(distance)) / sd(distance),suffer_score))+geom_point()
+grid.arrange(p1, p2, ncol = 2)
+
+
+run_mod2 <- scale(run_mod) %>% as.data.frame() %>% select(-("time_avehr"))
+mod2 <- list()
+mod2[['intercept_only']] <- lm(suffer_score ~ 1, data=run_mod2)
+all2    <- mod2[['all']] <- lm(suffer_score ~ ., data=run_mod2)
+back1.2 <- mod2[['back1']] <- step(all, direction='backward', scope=formula(all), trace=0)
+back2.2 <- mod2[['back2']] <- step(all, direction = "backward", k = log(nrow(run_mod2)), trace = 0)
+
+
+# plot interaction mod predictions against actual
+plot(predict(timexmhr),
+     run$suffer_score,
      xlab = "Predicted Values",
      ylab = "Observed Values")
-abline(a = 0,                                        # Add straight line
+abline(a = 0,
        b = 1,
        col = "red",
        lwd = 2)
 
-library(corrplot)
-library(magrittr)
-cor_matrix <- cor(run_mod[,c(1,2,3,4,5,6,7,8,9)])
-corrplot(cor(run_data[,c(3,4,5,6,7,8,9,10,11,12)]),method='circle')
 
-run_norm <- run_data %>% select(-c("name","id")) %>%
+library(magrittr)
+
+corrplot(cor_matrix_reg,method='circle')
+
+run_norm <- run_mod %>%
   mutate(across(c(average_heartrate, 
                   max_heartrate, 
                   average_cadence, 
                   average_speed),
                 ~ (.-mean(.))/sd(.)))
-norm_mod <- list()
-# intercept-only model
-norm_mod[['intercept_only']] <- lm(suffer_score ~ 1, data=run_norm)
-# model with all predictors
-norm_mod[['all']] <- lm(suffer_score ~ ., data=run_norm)
-all_norm <- norm_mod[['all']]
-# backward stepwise regression
-norm_mod[['backward']] <- step(all_norm, direction='backward', scope=formula(all), trace=0)
-backward_norm <- norm_mod[['backward']]
-# distance*speed
-dist_interaction <- norm_mod[["dist_interaction"]] <- lm(suffer_score ~ distance*average_heartrate + distance*average_cadence + average_speed, data = run_mod)
-norm_mod[['backward2']] <- step(dist_interaction, direction='backward', scope=formula(all), trace=0)
+cor_matrix_norm <- cor(run_norm) %>% print()
+corrplot(cor_matrix_norm,method='circle')
+
+# create a new data frame with the variables of interest
+quartz()
+df <- run[c("distance", "elapsed_time", "total_elevation_gain", "average_heartrate")]
+df_long <- tidyr::gather(df, key = "variable", value = "value")
+ggplot(df_long, aes(x = variable, y = value, fill = variable)) +
+  geom_violin() +
+  scale_fill_discrete(guide = FALSE) +
+  xlab("") +
+  ylab("") +
+  theme_minimal()
+top_10_suffer_scores <- head(arrange(run, desc(suffer_score)), 10) %>% print()
+top_10_time          <- head(arrange(run, desc(elapsed_time)), 10) %>% print()
+top_10_average_hr    <- head(arrange(run, desc(average_heartrate)), 10) %>% print()
+top_10_total_elev    <- head(arrange(run, desc(total_elevation_gain)), 10) %>% print()
 
 ## scrape activity stream
 activity_title <- "Solo Tempo"
-id_numbers     <- run_fltrd %>%
+id_numbers     <- run %>%
   filter(name == activity_title) %>%
   pull(id)
 test_strms <- get_activity_streams(activities, stoken, id = id_numbers)

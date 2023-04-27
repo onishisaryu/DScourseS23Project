@@ -1,0 +1,42 @@
+---
+title: "Strava Suffer Score"
+author: "Saryu Onishi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Exploring Strava's Suffer Score
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using **R Markdown** see <http://rmarkdown.rstudio.com>.
+
+---
+
+## Strava Data
+
+Obtain data through Strava API.
+
+---
+
+## Models
+
+Backwards stepwise linear regression models.
+
+---
+
+## Model fit
+
+
+Plotting the residuals against outcome variable
+
+### initial backward
+
+
+### second backward
+
+---
+## Model residual plot
+

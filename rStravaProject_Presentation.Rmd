@@ -1,0 +1,68 @@
+---
+title: "Strava Suffer Score"
+author: "Saryu Onishi"
+date: "`2023-04`"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts','sp23.css']
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+    seal: false
+    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+class: title-slide   
+<br><br>
+# Exploring Strava's Suffer Score
+## ECON 5252 Final Project
+### Saryu Onishi 
+
+---
+# Introduction
+## Strava
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Suffer score
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+---
+
+# Data
+## Strava API
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+---
+
+# Methods
+
+```{r cars, echo = TRUE}
+summary(cars)
+```
+
+---
+
+# Findings
+.pull-left[
+## sub-title
+- heteroscedasticity
+]
+
+.pull-right[
+```{r}
+ggplot(plot_data, aes(x = x, y = y)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(x = "Suffer Score", y = "Residuals")
+```
+]
+
+---
+# So what?
+
