@@ -149,7 +149,7 @@ mod_df <-
 2. Limitations
  - Method of variable selection
  - Interaction between variables
- - hetertoscedastic data
+ - heteroscedastic data
  - possible non-linear relationships
 
 ???
