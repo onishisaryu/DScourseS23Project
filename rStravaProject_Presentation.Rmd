@@ -16,6 +16,9 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(modelsummary)
+library(psych)
 ```
 class: title-slide   
 <br><br>
@@ -24,45 +27,134 @@ class: title-slide
 ### Saryu Onishi 
 
 ---
-# Introduction
-## Strava
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-## Suffer score
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+# Introduction to Strava and Suffer Score
+.pull-left[
+## Dashboard
+- Share activities
+- Interact with fellow uploaders
+![](StravaDashboard.png)
+]
+.pull-right[
+## Analysis
+- Summary of activity
+- In-depth analysis
+![](Stravasample.png)
+]
+
+???
+indepth analysis:
+- pace analysis
+- hr analysis
+- relative effort
+---
+# Suffer Score / Relative Effort / Training Load
+.pull-left[
+<!--.center[<img src="StravaRE.png" alt="Image" width="70%" height="70%">]-->
+![](StravaRE.png)
+]
+.pull-right[
+Measure of training load
+- Training impulse (Banister et al.)
+Dose response relationship
+
+### Goal: 
+- Analyze the relationship between summary statistics and the suffer score
+]
+???
+suffer score:
+- measure that helps get an idea "dose" of the activity, in relation to the physiological "response"
+
+assume we care about the "suffer score" metric. 
+
+assume we want to know how various summary metrics impact suffer score
 
 ---
 
 # Data
-## Strava API
-- Bullet 1
-- Bullet 2
-- Bullet 3
-
+1. Scrape activity data from single user
+2. Filter activities that meet the following criteria:
+ - Activity type = Run
+ - Has heart rate data
+ - Accessible data
+3. Mutate time variable (seconds -> minutes)
+ 
+<small>
+```{r}
+run <- read.csv("StravaData.csv") %>% as.data.frame() 
+options(width = 120)
+head(run)
+```
+</small>
+???
+why only my profile:
+- physiological responses vary
+- authentication
 ---
 
 # Methods
+Multiple linear regression
+$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_n X_n + \epsilon$$
+- Backwards Stepwise regression
 
-```{r cars, echo = TRUE}
-summary(cars)
+```{r, include=FALSE}
+run_mod <- run %>% select(-c("name","id","start_date"))
+initial <- lm(suffer_score ~ ., data=run_mod)
+mod     <- list()
+back    <- mod[['backwards']] <- step(initial, direction='backward')
+# var     <- colnames(run_mod)
 ```
+.center[
+```{r, include=TRUE}
+# var_df <- var %>% 
+#   as.data.frame() %>% 
+#   mutate(IndependentVariables = var) %>% 
+#   select(IndependentVariables) %>% 
+#   filter(IndependentVariables != 'suffer_score')
 
+data_sum <- run_mod %>% 
+  describe() %>% 
+  select(c("n","mean","sd","min","max")) %>% 
+  print()
+```
+]
 ---
-
 # Findings
-.pull-left[
-## sub-title
-- heteroscedasticity
-]
+<!--.center[<img src="pred_actual.png" alt="Image" width="50%" height="50%">]-->
+$Y = -217 + 7.06distance -0.55time + 1.28hr_{ave} + 0.16hr_{max} + \epsilon$
 
-.pull-right[
+
 ```{r}
-ggplot(plot_data, aes(x = x, y = y)) +
-  geom_point() +
-  geom_smooth(method = "loess") +
-  labs(x = "Suffer Score", y = "Residuals")
+mod_df <- 
+  summary(back)$coefficients %>% 
+  as.data.frame %>% 
+  select(-"t value") %>% 
+  print()
+
 ```
-]
 
 ---
-# So what?
+# Findings
+## Performance
+.pull-left[
+![](pred_actual.png)
+]
+.pull-right[
+![](resid_pred.png)
+]
+---
+# Concluding Remarks
+1. Insights from the model
+ - Important variables
+ - Limitations of summary metrics to capture training load
+2. Limitations
+ - Method of variable selection
+ - Interaction between variables
+ - hetertoscedastic data
+ - possible non-linear relationships
 
+???
+2. limitation
+  - linear relationships assumed
+  - 
+ 
+ 

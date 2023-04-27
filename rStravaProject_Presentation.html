@@ -22,54 +22,144 @@ class: title-slide
 ### Saryu Onishi 
 
 ---
-# Introduction
-## Strava
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see &lt;http://rmarkdown.rstudio.com&gt;.
-## Suffer score
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+# Introduction to Strava and Suffer Score
+.pull-left[
+## Dashboard
+- Share activities
+- Interact with fellow uploaders
+![](StravaDashboard.png)
+]
+.pull-right[
+## Analysis
+- Summary of activity
+- In-depth analysis
+![](Stravasample.png)
+]
+
+???
+indepth analysis:
+- pace analysis
+- hr analysis
+- relative effort
+---
+# Suffer Score / Relative Effort / Training Load
+.pull-left[
+&lt;!--.center[&lt;img src="StravaRE.png" alt="Image" width="70%" height="70%"&gt;]--&gt;
+![](StravaRE.png)
+]
+.pull-right[
+Measure of training load
+- Training impulse (Banister et al.)
+Dose response relationship
+
+### Goal: 
+- Analyze the relationship between summary statistics and the suffer score
+]
+???
+suffer score:
+- measure that helps get an idea "dose" of the activity, in relation to the physiological "response"
+
+assume we care about the "suffer score" metric. 
+
+assume we want to know how various summary metrics impact suffer score
 
 ---
 
 # Data
-## Strava API
-- Bullet 1
-- Bullet 2
-- Bullet 3
+1. Scrape activity data from single user
+2. Filter activities that meet the following criteria:
+ - Activity type = Run
+ - Has heart rate data
+ - Accessible data
+3. Mutate time variable (seconds -&gt; minutes)
+ 
+&lt;small&gt;
 
+```
+##                 name         id           start_date distance time_minutes total_elevation_gain average_heartrate
+## 1   Long Run + build 8945183319 2023-04-23T17:40:17Z  23.0664     92.06667                156.2             154.2
+## 2      Friday Cruise 8930672678 2023-04-21T13:32:51Z  10.0593     45.05000                 31.9             148.9
+## 3         Solo Tempo 8925481489 2023-04-20T14:24:45Z  17.2226     72.06667                 50.4             158.2
+## 4 Wednesday fun run  8921325523 2023-04-19T12:45:02Z  12.0372     61.00000                 44.5             143.2
+## 5       3x1200+3x800 8912795829 2023-04-18T13:02:16Z  12.3166     69.01667                 33.8             152.2
+## 6           Long run 8901771002 2023-04-16T13:04:06Z  22.1057     95.55000                172.2             147.3
+##   max_heartrate average_cadence average_speed suffer_score
+## 1           168            89.4       15.2244          149
+## 2           156            88.1       14.0040           58
+## 3           176            91.4       15.1560          129
+## 4           161            87.3       13.1364           47
+## 5           176            89.5       13.8996           71
+## 6           181            89.6       14.0616          109
+```
+&lt;/small&gt;
+???
+why only my profile:
+- physiological responses vary
+- authentication
 ---
 
 # Methods
+Multiple linear regression
+`$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_n X_n + \epsilon$$`
+- Backwards Stepwise regression
 
 
-```r
-summary(cars)
+.center[
+
 ```
-
+##                        n   mean    sd    min    max
+## distance             336  11.41  4.51   0.96  23.51
+## time_minutes         336  59.45 24.39   4.67 144.72
+## total_elevation_gain 336  55.33 60.01   0.00 303.10
+## average_heartrate    336 147.53 11.84 116.60 184.00
+## max_heartrate        336 169.52 13.38 130.00 204.00
+## average_cadence      336  88.10  2.16  76.80  97.50
+## average_speed        336  12.38  1.59   8.35  20.22
+## suffer_score         336  47.46 32.45   2.00 175.00
 ```
-##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00
-```
-
+]
 ---
-
 # Findings
-.pull-left[
-## sub-title
-- heteroscedasticity
-]
+&lt;!--.center[&lt;img src="pred_actual.png" alt="Image" width="50%" height="50%"&gt;]--&gt;
+`\(Y = -217 + 7.06distance -0.55time + 1.28hr_{ave} + 0.16hr_{max} + \epsilon\)`
 
-.pull-right[
-![](rStravaProject_Presentation_files/figure-html/pressure-1.png)&lt;!-- --&gt;
-]
+
+
+```
+##                       Estimate Std. Error     Pr(&gt;|t|)
+## (Intercept)       -217.3052183 14.2149366 2.739722e-40
+## distance             7.0597331  0.6571852 2.717564e-23
+## time_minutes        -0.5467013  0.1250150 1.643025e-05
+## average_heartrate    1.2810307  0.1325481 1.258013e-19
+## max_heartrate        0.1634457  0.1105630 1.402774e-01
+```
 
 ---
-# So what?
+# Findings
+## Performance
+.pull-left[
+![](pred_actual.png)
+]
+.pull-right[
+![](resid_pred.png)
+]
+---
+# Concluding Remarks
+1. Insights from the model
+ - Important variables
+ - Limitations of summary metrics to capture training load
+2. Limitations
+ - Method of variable selection
+ - Interaction between variables
+ - hetertoscedastic data
+ - possible non-linear relationships
 
+???
+2. limitation
+  - linear relationships assumed
+  - 
+ 
+ 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
