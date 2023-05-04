@@ -32,13 +32,13 @@ class: title-slide
 ## Dashboard
 - Share activities
 - Interact with fellow uploaders
-![](StravaDashboard.png)
+![](images/StravaDashboard.png)
 ]
 .pull-right[
 ## Analysis
 - Summary of activity
 - In-depth analysis
-![](Stravasample.png)
+![](images/Stravasample.png)
 ]
 
 ???
@@ -50,7 +50,7 @@ indepth analysis:
 # Suffer Score / Relative Effort / Training Load
 .pull-left[
 <!--.center[<img src="StravaRE.png" alt="Image" width="70%" height="70%">]-->
-![](StravaRE.png)
+![](images/StravaRE.png)
 ]
 .pull-right[
 Measure of training load
@@ -119,27 +119,28 @@ data_sum <- run_mod %>%
 ]
 ---
 # Findings
-<!--.center[<img src="pred_actual.png" alt="Image" width="50%" height="50%">]-->
-$Y = -217 + 7.06distance -0.55time + 1.28hr_{ave} + 0.16hr_{max} + \epsilon$
 
+$$Y = -217 + 7.06distance -0.55time + 1.28hr_{ave} + 0.16hr_{max} + \epsilon$$
 
-```{r}
+.center[
+```{r include=TRUE}
 mod_df <- 
-  summary(back)$coefficients %>% 
+  coef(summary(back)) %>% 
   as.data.frame %>% 
   select(-"t value") %>% 
   print()
 
 ```
-
+]
 ---
 # Findings
 ## Performance
+<!--.center[<img src="pred_actual.png" style="width: 20%"/>]-->
 .pull-left[
-![](pred_actual.png)
+![](images/pred_actual.png)
 ]
 .pull-right[
-![](resid_fit.png)
+![](images/resid_fit.png)
 ]
 ---
 # Concluding Remarks

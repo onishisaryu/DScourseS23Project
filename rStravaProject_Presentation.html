@@ -27,13 +27,13 @@ class: title-slide
 ## Dashboard
 - Share activities
 - Interact with fellow uploaders
-![](StravaDashboard.png)
+![](images/StravaDashboard.png)
 ]
 .pull-right[
 ## Analysis
 - Summary of activity
 - In-depth analysis
-![](Stravasample.png)
+![](images/Stravasample.png)
 ]
 
 ???
@@ -45,7 +45,7 @@ indepth analysis:
 # Suffer Score / Relative Effort / Training Load
 .pull-left[
 &lt;!--.center[&lt;img src="StravaRE.png" alt="Image" width="70%" height="70%"&gt;]--&gt;
-![](StravaRE.png)
+![](images/StravaRE.png)
 ]
 .pull-right[
 Measure of training load
@@ -120,10 +120,10 @@ Multiple linear regression
 ]
 ---
 # Findings
-&lt;!--.center[&lt;img src="pred_actual.png" alt="Image" width="50%" height="50%"&gt;]--&gt;
-`\(Y = -217 + 7.06distance -0.55time + 1.28hr_{ave} + 0.16hr_{max} + \epsilon\)`
 
+`$$Y = -217 + 7.06distance -0.55time + 1.28hr_{ave} + 0.16hr_{max} + \epsilon$$`
 
+.center[
 
 ```
 ##                       Estimate Std. Error     Pr(&gt;|t|)
@@ -133,15 +133,16 @@ Multiple linear regression
 ## average_heartrate    1.2810307  0.1325481 1.258013e-19
 ## max_heartrate        0.1634457  0.1105630 1.402774e-01
 ```
-
+]
 ---
 # Findings
 ## Performance
+&lt;!--.center[&lt;img src="pred_actual.png" style="width: 20%"/&gt;]--&gt;
 .pull-left[
-![](pred_actual.png)
+![](images/pred_actual.png)
 ]
 .pull-right[
-![](resid_fit.png)
+![](images/resid_fit.png)
 ]
 ---
 # Concluding Remarks
