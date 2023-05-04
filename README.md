@@ -1,4 +1,7 @@
 # DScourseS23Project
-Final project for ECON5253
+## Exploring Strava's Suffer Score
+Final project for ECON5253 (Sp23)
+
+
 
 Update from local machine
