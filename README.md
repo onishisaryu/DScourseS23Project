@@ -7,13 +7,22 @@ The data for this project is activity log data from Strava, scraped using their 
 
 The process can be summarized in the following steps:
 1. Data collection is initiated by the get_activity_list(stoken) command.
- - Requires authorization from the user specified earlier. 
+  - Requires authorization from the user specified earlier. 
 2. Data is filtered to only include fields necessary for the project.
- - Use the filter() and select() functions. 
+  - Use the filter() and select() functions. 
 3. Store data in "run_mod" data frame for use in data analysis section.
 
-The code for this can be found in /Rcode/data_cleaning.R
+The code for this can be found in the Rcode directory (/Rcode/data_cleaning.R)
 
 ### Data Analysis
+The main method of data analysis used in this project is backwards stepwise multiple regression. This process follows these steps:
+1. Generate an initial model with all variables
+2. Initiate a stepwise variable selection to keep only the important variables. 
 
-Update from local machine
+This was repeated three times, with each iteration adding a new component to the initial model. 
+- The first model is a basic multiple regression, with no manipulation of variables. 
+- The next includes quadratic transformations of the variables.
+- The final model includes interaction terms. Only significant interactions are kept in the source code.
+
+The code for this section can be found in Rcode directory (/Rcode/data_analysis.R)
+
