@@ -82,4 +82,4 @@ final <- list()
 final[['model 1']] <- step1
 final[['model 2']] <- step2
 final[['model 3']] <- step3
-modelsummary(final, stars=T, statistic = 'p.value',output = 'latex')
+modelsummary(final, stars=T, statistic = 'p.value')#,output = 'latex')
