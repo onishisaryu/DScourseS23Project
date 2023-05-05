@@ -1,6 +1,6 @@
-############################
-# Load additional packages #
-############################
+################################
+#   Load additional packages   #
+################################
 library(car)
 library(MASS)
 
@@ -24,9 +24,9 @@ ggplot(run_mod,
   labs(title = "Predicted vs Actual Suffer Score", x = "Predicted", y = "Actual") +
   scale_color_gradient(low = "green", high = "red")
 
-###########################
-# Stepwise with quadratic #
-###########################
+################################
+#   Stepwise with quadratic    #
+################################
 formula <- as.formula("suffer_score ~ distance + time_minutes + average_speed + total_elevation_gain + average_heartrate + max_heartrate + average_cadence + I(distance^2) + I(time_minutes^2) + I(average_speed^2) + I(total_elevation_gain^2) + I(average_heartrate^2) + I(max_heartrate^2) + I(average_cadence^2)")
 full.model <- lm(formula, data = run_mod)
 step2 <- stepAIC(full.model, direction = "backward")
@@ -44,9 +44,9 @@ ggplot(run_mod,
   labs(title = "Predicted vs Actual Suffer Score", x = "Predicted", y = "Actual") +
   scale_color_gradient(low = "green", high = "red")
 
-#######################
-# Adding interactions #
-#######################
+################################
+#     Adding interactions      #
+################################
 formula <- 
   as.formula("suffer_score ~ 
              distance + I(distance^2) +
@@ -75,9 +75,9 @@ ggplot(run_mod, aes(x = predict(step3), y = suffer_score, color = average_heartr
   labs(title = "Predicted vs Actual Suffer Score", x = "Predicted", y = "Actual") +
   scale_color_gradient(low = "green", high = "red")
 
-#################
-# Final summary #
-#################
+################################
+#       Final summary         #
+################################
 final <- list()
 final[['model 1']] <- step1
 final[['model 2']] <- step2
