@@ -17,11 +17,12 @@ summary(step1)
 # m1[['Stepwise a']] <- b1
 # modelsummary(m1)
 
-ggplot(run_mod, 
-       aes(x = predict(step1), y = suffer_score, color = average_heartrate)) +
+p1<- 
+  ggplot(run_mod, 
+       aes(x = predict(step1), y = suffer_score, color = suffer_score)) +
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = T) +
-  labs(title = "Predicted vs Actual Suffer Score", x = "Predicted", y = "Actual") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), se = F) +
+  labs(title = "Predicted vs Actual Suffer Score, model 1", x = "Predicted", y = "Actual") +
   scale_color_gradient(low = "green", high = "red")
 
 ################################
@@ -37,11 +38,12 @@ summary(step2)
 # m2[['Quadratic Stepwise']] <- step.model
 # modelsummary(m2)
 
-ggplot(run_mod, 
-       aes(x = predict(step2), y = suffer_score, color = average_heartrate)) +
+p2 <-
+  ggplot(run_mod, 
+       aes(x = predict(step2), y = suffer_score, color = suffer_score)) +
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = T) +
-  labs(title = "Predicted vs Actual Suffer Score", x = "Predicted", y = "Actual") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), se = F) +
+  labs(title = "Predicted vs Actual Suffer Score, model 2", x = "Predicted", y = "Actual") +
   scale_color_gradient(low = "green", high = "red")
 
 ################################
@@ -69,10 +71,11 @@ model <- lm(formula, data = run_mod)
 step3 <- stepAIC(model, direction = "backward")
 summary(step3)
 
-ggplot(run_mod, aes(x = predict(step3), y = suffer_score, color = average_heartrate)) +
+p3  <-
+  ggplot(run_mod, aes(x = predict(step3), y = suffer_score, color = suffer_score)) +
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = T) +
-  labs(title = "Predicted vs Actual Suffer Score", x = "Predicted", y = "Actual") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), se = F) +
+  labs(title = "Predicted vs Actual Suffer Score, model 3", x = "Predicted", y = "Actual") +
   scale_color_gradient(low = "green", high = "red")
 
 ################################
@@ -83,3 +86,20 @@ final[['model 1']] <- step1
 final[['model 2']] <- step2
 final[['model 3']] <- step3
 modelsummary(final, stars=T, statistic = 'p.value')#,output = 'latex')
+
+ggsave("model1_pred.png",p1)
+ggsave("model2_pred.png",p2)
+ggsave("model3_pred.png",p3)
+# plotdata <- 
+#   with(run_mod, 
+#   data.frame(
+#   Suffer_Score = suffer_score,
+#   Resid_model1 = residuals(step1),
+#   Resid_model2 = residuals(step2),
+#   Resid_model3 = residuals(step3)
+# ))
+# data_long <- plotdata %>%
+#   gather(key = "model", value = "residual", - Suffer_Score)
+# ggplot(data_long, aes(x = Suffer_Score, y = residual, color = model)) +
+#   geom_point() +
+#   geom_hline(yintercept = 0, linetype = "dashed")
