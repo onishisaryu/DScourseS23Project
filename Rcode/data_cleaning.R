@@ -3,7 +3,6 @@
 #################
 library(rStrava)
 library(tidyverse)
-library(psych)
 library(xtable)
 library(corrplot)
 library(modelsummary)
