@@ -1,0 +1,162 @@
+---
+title: "Strava Suffer Score"
+author: "Saryu Onishi"
+date: "`2023-04`"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts','sp23.css']
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+    seal: false
+    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(modelsummary)
+library(psych)
+setwd("/Users/saryu/Desktop/git/rStravaProject/presentation")
+```
+class: title-slide   
+<br><br>
+# Exploring Strava's Suffer Score
+## ECON 5252 Final Project
+### Saryu Onishi 
+
+---
+# Introduction to Strava and Suffer Score
+.pull-left[
+## Dashboard
+- Share activities
+- Interact with fellow uploaders
+![](images/StravaDashboard.png)
+]
+.pull-right[
+## Analysis
+- Summary of activity
+- In-depth analysis
+![](images/Stravasample.png)
+]
+
+???
+indepth analysis:
+- pace analysis
+- hr analysis
+- relative effort
+---
+# Suffer Score / Relative Effort / Training Load
+.pull-left[
+<!--.center[<img src="StravaRE.png" alt="Image" width="70%" height="70%">]-->
+![](images/StravaRE.png)
+]
+.pull-right[
+Measure of training load
+- Training impulse (Banister et al.)
+Dose response relationship
+
+### Goal: 
+- Analyze the relationship between summary statistics and the suffer score
+]
+???
+suffer score:
+- measure that helps get an idea "dose" of the activity, in relation to the physiological "response"
+
+assume we care about the "suffer score" metric. 
+
+assume we want to know how various summary metrics impact suffer score
+
+---
+
+# Data
+1. Scrape activity data from single user
+2. Filter activities that meet the following criteria:
+ - Activity type = Run
+ - Has heart rate data
+ - Accessible data
+3. Mutate time variable (seconds -> minutes)
+ 
+<small>
+```{r}
+run <- read.csv("SampleData.csv") %>% as.data.frame() 
+options(width = 120)
+head(run)
+```
+</small>
+???
+why only my profile:
+- physiological responses vary
+- authentication
+---
+
+# Methods
+Multiple linear regression
+$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + ... + \beta_n X_n + \epsilon$$
+- Backwards Stepwise regression
+
+```{r, include=FALSE}
+run_mod <- run %>% select(-c("name","id","start_date"))
+initial <- lm(suffer_score ~ ., data=run_mod)
+mod     <- list()
+back    <- mod[['backwards']] <- step(initial, direction='backward')
+# var     <- colnames(run_mod)
+```
+.center[
+```{r, include=TRUE}
+# var_df <- var %>% 
+#   as.data.frame() %>% 
+#   mutate(IndependentVariables = var) %>% 
+#   select(IndependentVariables) %>% 
+#   filter(IndependentVariables != 'suffer_score')
+
+data_sum <- run_mod %>% 
+  describe() %>% 
+  select(c("n","mean","sd","min","max")) %>% 
+  print()
+```
+]
+---
+# Findings
+
+$$Y = -217 + 7.06distance -0.55time + 1.28hr_{ave} + 0.16hr_{max} + \epsilon$$
+
+.center[
+```{r include=TRUE}
+mod_df <- 
+  coef(summary(back)) %>% 
+  as.data.frame %>% 
+  select(-"t value") %>% 
+  print()
+
+```
+]
+---
+# Findings
+## Performance
+<!--.center[<img src="pred_actual.png" style="width: 20%"/>]-->
+.pull-left[
+![](images/pred_actual.png)
+]
+.pull-right[
+![](images/resid_fit.png)
+]
+---
+# Concluding Remarks
+1. Insights from the model
+ - Important variables
+ - Limitations of summary metrics to capture training load
+2. Limitations
+ - Method of variable selection
+ - Interaction between variables
+ - heteroscedastic data
+ - possible non-linear relationships
+
+???
+2. limitation
+  - linear relationships assumed
+  - 
+ 
+ 
