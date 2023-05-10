@@ -11,12 +11,6 @@ initial <- lm(suffer_score ~ ., data=run_mod)
 step1   <- step(initial, direction='backward')
 summary(step1)
 
-# # results
-# m1 <- list()
-# m1[['Initial']] <- initial
-# m1[['Stepwise a']] <- b1
-# modelsummary(m1)
-
 p1<- 
   ggplot(run_mod, 
        aes(x = predict(step1), y = suffer_score, color = suffer_score)) +
@@ -32,11 +26,6 @@ formula <- as.formula("suffer_score ~ distance + time_minutes + average_speed + 
 full.model <- lm(formula, data = run_mod)
 step2 <- stepAIC(full.model, direction = "backward")
 summary(step2)
-
-# m2 <- list()
-# m2[['Initial']] <- full.model
-# m2[['Quadratic Stepwise']] <- step.model
-# modelsummary(m2)
 
 p2 <-
   ggplot(run_mod, 
@@ -90,6 +79,7 @@ modelsummary(final, stars=T, statistic = 'p.value')#,output = 'latex')
 ggsave("model1_pred.png",p1)
 ggsave("model2_pred.png",p2)
 ggsave("model3_pred.png",p3)
+
 # plotdata <- 
 #   with(run_mod, 
 #   data.frame(
