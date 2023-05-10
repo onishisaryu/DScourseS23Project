@@ -22,7 +22,9 @@ The main method of data analysis used in this project is backwards stepwise mult
 This was repeated three times, with each iteration adding a new component to the initial model. 
 - The first model is a basic multiple regression, with no manipulation of variables. 
 - The next includes quadratic transformations of the variables.
-- The final model includes interaction terms. Only significant interactions are kept in the source code.
+- The final model includes interaction terms. Only significant interactions are kept in the source code (interaction terms with elevation variable excluded).
+
+Plots are contained in objects p1, p2 and p3. Execute the object name as a command to print plots.
 
 The code for this section can be found in Rcode directory (/Rcode/data_analysis.R)
 
